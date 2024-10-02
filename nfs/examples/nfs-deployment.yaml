@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nfs
+  name: nfs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs
+  template:
+    metadata:
+      labels:
+        app: nfs
+    spec:
+      containers:
+        - image: ghcr.io/sharpie/nfs:latest
+          name: nfs
+          env:
+            - name: container
+              value: kubernetes
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: run
+              mountPath: /run
+          tty: true
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
