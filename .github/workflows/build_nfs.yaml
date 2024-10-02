@@ -25,3 +25,31 @@ jobs:
         with:
           name: '${{ env.DOCKER_TAR }}'
           path: '${{ env.DOCKER_TAR }}'
+
+  ship:
+    runs-on: ubuntu-24.04
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.DOCKER_TAR }}'
+          path: '.'
+      - name: Import Docker images
+        run: docker load -i "${DOCKER_TAR}"
+      - name: Tag Docker images
+        run: |
+          docker tag "${DOCKER_TAG}" "ghcr.io/sharpie/${DOCKER_TAG}"
+          docker tag "${DOCKER_TAG}" "ghcr.io/sharpie/nfs:latest"
+      - name: Shipit
+        run: |
+          docker push "ghcr.io/sharpie/${DOCKER_TAG}"
+          docker push "ghcr.io/sharpie/nfs:latest"
