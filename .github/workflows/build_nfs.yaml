@@ -6,50 +6,87 @@ on:
 
 env:
   DOCKER_TAG: 'nfs:${{ github.sha }}'
-  DOCKER_TAR: 'nfs_${{ github.sha }}.tar'
 
 jobs:
   build:
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        platform: [amd64, arm64]
+    env:
+      PLATFORM: '${{ matrix.platform }}'
+      DOCKER_TAR: 'nfs_${{ github.sha }}_${{ matrix.platform }}.tar'
+    outputs:
+      amd64: '${{ steps.save_output.outputs.amd64 }}'
+      arm64: '${{ steps.save_output.outputs.arm64 }}'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      - uses: docker/setup-qemu-action@v3
+        if: "${{ matrix.platform != 'amd64'}}"
+        with:
+          platforms: '${{ matrix.platform }}'
       - name: Build Docker Container
         run: |
-          docker build --platform linux/amd64 --tag $DOCKER_TAG -f nfs/Containerfile nfs
+          docker build --platform "linux/${PLATFORM}" --tag "${DOCKER_TAG}-${PLATFORM}" -f nfs/Containerfile nfs
       - name: Export Docker Container
         run: |
-          docker save -o "$DOCKER_TAR" $DOCKER_TAG
+          docker save -o "${DOCKER_TAR}" "${DOCKER_TAG}-${PLATFORM}"
       - uses: actions/upload-artifact@v4
         with:
           name: '${{ env.DOCKER_TAR }}'
           path: '${{ env.DOCKER_TAR }}'
+      - name: Save Build Output
+        id: save_output
+        run: |
+          printf '%s=%s@%s\n' "${PLATFORM}" "${DOCKER_TAR}" "${DOCKER_TAG}-${PLATFORM}" >> $GITHUB_OUTPUT
 
   ship:
     runs-on: ubuntu-24.04
     needs: build
+    env:
+      BUILD_OUTPUT: '${{ toJSON(needs.build.outputs) }}'
+    services:
+      registry:
+        image: 'registry:2'
+        ports:
+          - '5000:5000'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      - uses: regclient/actions/regctl-installer@main
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: regclient/actions/regctl-login@main
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/download-artifact@v4
         with:
-          name: '${{ env.DOCKER_TAR }}'
-          path: '.'
-      - name: Import Docker images
-        run: docker load -i "${DOCKER_TAR}"
-      - name: Tag Docker images
+          merge-multiple: true
+      - name: Import Docker Images
         run: |
-          docker tag "${DOCKER_TAG}" "ghcr.io/sharpie/${DOCKER_TAG}"
-          docker tag "${DOCKER_TAG}" "ghcr.io/sharpie/nfs:latest"
+          declare -a TAGS
+          items=$(jq -r '.[]|values' <<<"${BUILD_OUTPUT}")
+
+          while IFS='@' read file tag; do
+            local_tag="localhost:5000/${tag}"
+
+            docker load -i "${file}"
+            docker tag "${tag}" "${local_tag}"
+            docker push "${local_tag}"
+
+            TAGS+=("${local_tag}")
+          done <<<"${items}"
+
+          docker manifest create --insecure "localhost:5000/${DOCKER_TAG}" "${TAGS[@]}"
+          docker manifest push "localhost:5000/${DOCKER_TAG}"
       - name: Shipit
         run: |
-          docker push "ghcr.io/sharpie/${DOCKER_TAG}"
-          docker push "ghcr.io/sharpie/nfs:latest"
+          regctl registry set localhost:5000 --tls disabled
+
+          regctl image copy "localhost:5000/${DOCKER_TAG}" "ghcr.io/sharpie/${DOCKER_TAG}"
+          regctl image copy "localhost:5000/${DOCKER_TAG}" "ghcr.io/sharpie/nfs:latest"
+
