@@ -11,6 +11,7 @@ RUN systemctl mask rpcbind.service rpcbind.socket rpc-statd.service \
 
 COPY rootfs/ /
 
+VOLUME /data
 EXPOSE 111/udp 2049/tcp
 STOPSIGNAL SIGRTMIN+3
 
