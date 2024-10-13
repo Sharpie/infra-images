@@ -1,0 +1,37 @@
+---
+services:
+  nfs-server:
+    container_name: nfs-server
+    image: '${DOCKER_TAG:-ghcr.io/sharpie/nfs:latest}'
+    platform: '${DOCKER_PLATFORM:-}'
+    environment:
+      container: docker
+    configs:
+      - source: test_file
+        target: /data/hello
+    networks:
+      - test
+    privileged: true
+    tmpfs:
+      - /run
+      - /tmp
+    tty: true
+  nfs-client:
+    container_name: nfs-client
+    image: '${DOCKER_TAG:-ghcr.io/sharpie/nfs:latest}'
+    platform: '${DOCKER_PLATFORM:-}'
+    entrypoint:
+      - /bin/sh
+    privileged: true
+    networks:
+      - test
+    stop_signal: SIGTERM
+    tty: true
+
+configs:
+  test_file:
+    content: |
+      Hello, world!
+
+networks:
+  test:
