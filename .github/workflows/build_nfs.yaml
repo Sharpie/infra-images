@@ -42,9 +42,48 @@ jobs:
         run: |
           printf '%s=%s@%s\n' "${PLATFORM}" "${DOCKER_TAR}" "${DOCKER_TAG}-${PLATFORM}" >> $GITHUB_OUTPUT
 
+  test:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        platform: [amd64, arm64]
+    env:
+      PLATFORM: '${{ matrix.platform }}'
+      DOCKER_PLATFORM: 'linux/${{ matrix.platform }}'
+      DOCKER_TAR: 'nfs_${{ github.sha }}_${{ matrix.platform }}.tar'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: docker/setup-qemu-action@v3
+        if: "${{ matrix.platform != 'amd64'}}"
+        with:
+          platforms: '${{ matrix.platform }}'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.DOCKER_TAR }}'
+          path: '.'
+      - name: Import Docker images
+        run: |
+          docker load -i "${DOCKER_TAR}"
+          docker image ls
+      - name: Set Up Test Containers
+        working-directory: nfs/spec/fixtures/docker
+        run: |
+          env DOCKER_TAG="${DOCKER_TAG}-${PLATFORM}" docker compose up -d
+      - name: Run Acceptance Tests
+        run: bundle exec rspec -I nfs/spec/ -fd nfs/spec/acceptance/docker/*.rb
+
   ship:
     runs-on: ubuntu-24.04
-    needs: build
+    needs: 
+      - build
+      - test
     env:
       BUILD_OUTPUT: '${{ toJSON(needs.build.outputs) }}'
     services:
