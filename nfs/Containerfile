@@ -2,8 +2,9 @@ FROM debian:12-slim
 
 RUN set -xe \
     && apt update \
-    && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends nfs-kernel-server systemd iproute2 procps \
-    && systemctl disable getty@.service
+    && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends nfs-kernel-server systemd iproute2 iputils-ping procps vim-tiny \
+    && systemctl disable getty@.service \
+    && update-alternatives --set editor /usr/bin/vim.tiny
 
 
 RUN systemctl mask rpcbind.service rpcbind.socket rpc-statd.service \
