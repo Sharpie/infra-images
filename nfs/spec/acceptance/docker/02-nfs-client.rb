@@ -11,6 +11,7 @@ context 'NFS Client' do
 
   describe host('nfs-server') do
     it { should be_resolvable }
+    it { should be_reachable.with(port: 2049) }
   end
 
   describe command('mount -t nfs4 nfs-server:/ /mnt') do

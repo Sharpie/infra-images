@@ -2,7 +2,7 @@ FROM debian:12-slim
 
 RUN set -xe \
     && apt update \
-    && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends nfs-kernel-server systemd iproute2 iputils-ping procps vim-tiny \
+    && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends nfs-kernel-server systemd iproute2 iputils-ping netcat-traditional procps vim-tiny \
     && systemctl disable getty@.service \
     && update-alternatives --set editor /usr/bin/vim.tiny
 
