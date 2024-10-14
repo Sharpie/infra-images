@@ -42,7 +42,7 @@ jobs:
         run: |
           printf '%s=%s@%s\n' "${PLATFORM}" "${DOCKER_TAR}" "${DOCKER_TAG}-${PLATFORM}" >> $GITHUB_OUTPUT
 
-  test:
+  docker-acceptance:
     needs: build
     runs-on: ubuntu-24.04
     strategy:
@@ -79,11 +79,59 @@ jobs:
       - name: Run Acceptance Tests
         run: bundle exec rspec -I nfs/spec/ -fd nfs/spec/acceptance/docker/*.rb
 
+  kubernetes-acceptance:
+    needs: build
+    runs-on: ubuntu-24.04
+    env:
+      DOCKER_TAR: 'nfs_${{ github.sha }}_amd64.tar'
+      GIT_SHA: '${{ github.sha }}'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.DOCKER_TAR }}'
+          path: '.'
+      - name: Install k3d
+        run: |
+          curl -sSL https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+      - name: Setup k3d cluster
+        run: |
+          k3d cluster create test --wait
+          kubectl rollout status deployment/coredns -n kube-system --timeout 1m
+          k3d image import -c test "${DOCKER_TAR}"
+      - name: Setup test k8s resources
+        run: |
+          cat <<EOF >nfs/spec/fixtures/kubernetes/kustomization.yaml
+          resources:
+           - '01-csi-driver-nfs.yaml'
+           - '02-nfs-server.yaml'
+           - '03-nfs-client.yaml'
+          images:
+            - name: ghcr.io/sharpie/nfs:latest
+              newName: nfs
+              newTag: ${GIT_SHA}-amd64
+          EOF
+
+          # Echo resources to stdout for debugging.
+          kubectl kustomize nfs/spec/fixtures/kubernetes
+
+          kubectl apply -k nfs/spec/fixtures/kubernetes --wait=true
+          kubectl rollout status deployment/nfs-client -n test --timeout 1m
+      - name: Run Acceptance Tests
+        run: bundle exec rspec -I nfs/spec/ -fd nfs/spec/acceptance/kubernetes/*.rb
+
   ship:
     runs-on: ubuntu-24.04
     needs: 
       - build
-      - test
+      - docker-acceptance
+      - kubernetes-acceptance
     env:
       BUILD_OUTPUT: '${{ toJSON(needs.build.outputs) }}'
     services:

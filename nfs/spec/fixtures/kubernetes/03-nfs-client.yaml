@@ -1,0 +1,38 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nfs-client
+  name: nfs-client
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs-client
+  template:
+    metadata:
+      labels:
+        app: nfs-client
+    spec:
+      containers:
+        - image: alpine
+          name: nfs-client
+          tty: true
+          volumeMounts:
+            - name: test-data
+              mountPath: /mnt
+      volumes:
+        - name: test-data
+          csi:
+            driver: nfs.csi.k8s.io
+            volumeAttributes:
+              server: nfs.storage.svc.cluster.local
+              share: /
