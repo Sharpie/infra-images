@@ -1,0 +1,263 @@
+---
+name: Build Containers
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Container image to build'
+        required: true
+        type: choice
+        options:
+          - nfs
+      platforms:
+        description: 'JSON list of platforms to build'
+        required: true
+        type: string
+        default: '["amd64", "arm64"]'
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+      platforms:
+        required: true
+        type: string
+
+env:
+  IMAGE: '${{ inputs.image }}'
+  TAG: '${{ github.sha }}'
+
+jobs:
+  setup:
+    runs-on: ubuntu-24.04
+    outputs:
+      test-configs: '${{ steps.set-params.outputs.test-configs }}'
+      tag: '${{ steps.set-params.outputs.tag }}'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set Project Params
+        id: set-params
+        run: |
+          # Determine which test suites are present for the given image
+          fixture_dirs=($(find "${IMAGE}/spec/fixtures" -mindepth 1 -maxdepth 1 -type d -name docker -o -name kubernetes))
+          test_configs=$(printf '%s\n' "${fixture_dirs[@]##*/}" |jq -scR 'split("\n")|.[:-1]')
+
+          printf 'test-configs=%s\n' "${test_configs}" | tee -a $GITHUB_OUTPUT
+          printf 'tag=%s\n' "${TAG}" | tee -a $GITHUB_OUTPUT
+
+  build:
+    needs:
+      - setup
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        platform: '${{ fromJSON(inputs.platforms) }}'
+    env:
+      PLATFORM: '${{ matrix.platform }}'
+      DOCKER_TAR: '${{ inputs.image }}_${{ needs.setup.outputs.tag }}_${{ matrix.platform }}.tar'
+      DOCKER_TAG: '${{ inputs.image }}:${{ needs.setup.outputs.tag }}-${{ matrix.platform }}'
+    # NOTE: Must explicitly define an output for each possible architecture because
+    #       the following issue is not fully implemented (as of Fall 2024):
+    #
+    #         https://github.com/actions/runner/pull/2477 
+    outputs:
+      amd64: '${{ steps.save_output.outputs.amd64 }}'
+      arm64: '${{ steps.save_output.outputs.arm64 }}'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: docker/setup-qemu-action@v3
+        if: "${{ matrix.platform != 'amd64'}}"
+        with:
+          platforms: '${{ matrix.platform }}'
+      - name: Build Docker Container
+        run: |
+          docker build --platform "linux/${PLATFORM}" --tag "${DOCKER_TAG}" -f "${IMAGE}/Containerfile" "${IMAGE}"
+      - name: Export Docker Container
+        run: |
+          docker save -o "${DOCKER_TAR}" "${DOCKER_TAG}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: '${{ env.DOCKER_TAR }}'
+          path: '${{ env.DOCKER_TAR }}'
+      - name: Save Build Output
+        id: save_output
+        run: |
+          printf '%s=%s@%s\n' "${PLATFORM}" "${DOCKER_TAR}" "${DOCKER_TAG}" | tee -a $GITHUB_OUTPUT
+
+  docker-acceptance:
+    needs:
+      - setup
+      - build
+    if: "${{ contains(fromJSON(needs.setup.outputs.test-configs), 'docker') }}"
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        platform: '${{ fromJSON(inputs.platforms) }}'
+    env:
+      PLATFORM: '${{ matrix.platform }}'
+      DOCKER_TAR: '${{ inputs.image }}_${{ needs.setup.outputs.tag }}_${{ matrix.platform }}.tar'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: docker/setup-qemu-action@v3
+        if: "${{ matrix.platform != 'amd64'}}"
+        with:
+          platforms: '${{ matrix.platform }}'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.DOCKER_TAR }}'
+          path: '.'
+      - name: Import Docker images
+        run: |
+          docker load -i "${DOCKER_TAR}"
+          docker image ls
+      - name: Set Up Test Containers
+        run: |
+          cd "${IMAGE}/spec/fixtures/docker"
+
+          env DOCKER_TAG="${IMAGE}:${TAG}-${PLATFORM}" DOCKER_PLATFORM="linux/${PLATFORM}" docker compose up -d
+      - name: Run Acceptance Tests
+        run: |
+          bundle exec rspec --force-color --format documentation -I spec/ "${IMAGE}"/spec/acceptance/docker/*.rb
+
+  kubernetes-acceptance:
+    needs:
+      - setup
+      - build
+    if: "${{ contains(fromJSON(needs.setup.outputs.test-configs), 'kubernetes') }}"
+    runs-on: ubuntu-24.04
+    env:
+      DOCKER_TAR: '${{ inputs.image }}_${{ needs.setup.outputs.tag }}_amd64.tar'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.DOCKER_TAR }}'
+          path: '.'
+      - name: Install k3d
+        run: |
+          # The k3d installer responds to the TAG variable.
+          unset TAG
+
+          curl -sSL https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+      - name: Setup k3d cluster
+        run: |
+          k3d cluster create test --wait
+          kubectl rollout status deployment/coredns -n kube-system --timeout 1m
+          k3d image import -c test "${DOCKER_TAR}"
+      - name: Set Up Test Containers
+        run: |
+          # NOTE: The fixtures directory is designed to be usable outside of this
+          #       test via "kubectl apply -f".
+          #
+          #       This test uses "kubectl apply -k" + a kustomize spec to sub
+          #       in the images generated by the build job.
+          k8s_manifests=("${IMAGE}"/spec/fixtures/kubernetes/*.yaml)
+
+          printf 'resources:\n' >"${IMAGE}/spec/fixtures/kustomization.yaml"
+          printf '  - %s\n' "${k8s_manifests[@]##*fixtures/}" >>"${IMAGE}/spec/fixtures/kustomization.yaml"
+          cat <<EOF >>"${IMAGE}/spec/fixtures/kustomization.yaml"
+          images:
+            - name: ghcr.io/sharpie/${IMAGE}
+              newName: ${IMAGE}
+              newTag: ${TAG}-amd64
+          EOF
+
+          # Echo resources to stdout for debugging.
+          kubectl kustomize "${IMAGE}/spec/fixtures"
+
+          kubectl apply -k "${IMAGE}/spec/fixtures" --wait=true
+
+          # Every pod exercised by the test suite should be labeled with part-of=test-suite
+          kubectl wait -A -l part-of=test-suite --for condition=Ready --timeout 1m pod
+      - name: Run Acceptance Tests
+        run: |
+          bundle exec rspec --force-color --format documentation -I spec/ "${IMAGE}"/spec/acceptance/kubernetes/*.rb
+
+  # NOTE: Shipping is a bit tricky due to the way Docker registries work.
+  #
+  #       Basically, you can only easily ship multi-arch containers that
+  #       are built side-by side. However, this constraint precludes
+  #       splitting the build and test steps by architecture to isolate
+  #       failures.
+  #
+  #       So. We build and test each container separately with the
+  #       architecture appended to the image tag. Then we import both
+  #       images into a locally running registry service and use
+  #       the "docker manifest" command to merge those separate
+  #       tags into a multi-arch tag.
+  #
+  #       All fine and good, the missing bit is that Docker really
+  #       does not provide a clean way to copy items between registries.
+  #       Luckily, the "regctl" tool implements this, so we use
+  #       it to copy the merged multi-arch tag to the ghcr.io registry.
+  ship:
+    runs-on: ubuntu-24.04
+    needs: 
+      - setup
+      - build
+      - docker-acceptance
+      - kubernetes-acceptance
+    # NOTE: This expresion causes the ship step to ignore any tests that
+    #       may be skipped due to no implementation.
+    if: "${{ !cancelled() && !failure() }}"
+    env:
+      BUILD_OUTPUT: '${{ toJSON(needs.build.outputs) }}'
+    services:
+      registry:
+        image: 'registry:2'
+        ports:
+          - '5000:5000'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: regclient/actions/regctl-installer@main
+      - name: Login to GitHub Container Registry
+        uses: regclient/actions/regctl-login@main
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - name: Import Docker Images
+        run: |
+          declare -a TAGS
+          items=$(jq -r '.[]|values' <<<"${BUILD_OUTPUT}")
+
+          while IFS='@' read file tag; do
+            local_tag="localhost:5000/${tag}"
+
+            docker load -i "${file}"
+            docker tag "${tag}" "${local_tag}"
+            docker push "${local_tag}"
+
+            TAGS+=("${local_tag}")
+          done <<<"${items}"
+
+          docker manifest create --insecure "localhost:5000/${IMAGE}:${TAG}" "${TAGS[@]}"
+          docker manifest push "localhost:5000/${IMAGE}:${TAG}"
+      - name: Shipit
+        run: |
+          regctl registry set localhost:5000 --tls disabled
+
+          regctl image copy "localhost:5000/${IMAGE}:${TAG}" "ghcr.io/sharpie/${IMAGE}:${TAG}"
+          regctl image copy "localhost:5000/${IMAGE}:${TAG}" "ghcr.io/sharpie/${IMAGE}:latest"

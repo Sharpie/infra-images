@@ -31,6 +31,7 @@ spec:
     metadata:
       labels:
         app: nfs
+        part-of: test-suite
     spec:
       containers:
         - image: ghcr.io/sharpie/nfs:latest

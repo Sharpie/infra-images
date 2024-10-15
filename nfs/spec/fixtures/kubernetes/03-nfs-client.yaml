@@ -21,6 +21,7 @@ spec:
     metadata:
       labels:
         app: nfs-client
+        part-of: test-suite
     spec:
       containers:
         - image: alpine
