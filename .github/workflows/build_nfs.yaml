@@ -6,6 +6,10 @@ on:
   push:
     paths:
       - 'nfs/**'
+  # Build at noon, on the 1st and 15th of each month.
+  schedule:
+    - cron: '0 12 1 * *'
+    - cron: '0 12 15 * *'
 
 jobs:
   build_nfs:
