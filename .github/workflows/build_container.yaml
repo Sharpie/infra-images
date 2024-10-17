@@ -43,7 +43,11 @@ jobs:
         id: set-params
         run: |
           # Determine which test suites are present for the given image
-          fixture_dirs=($(find "${IMAGE}/spec/fixtures" -mindepth 1 -maxdepth 1 -type d -name docker -o -name kubernetes))
+          if [[ -d "${IMAGE}/spec/fixtures" ]]; then
+            fixture_dirs=($(find "${IMAGE}/spec/fixtures" -mindepth 1 -maxdepth 1 -type d -name docker -o -name kubernetes))
+          else
+            fixture_dirs=()
+          fi
           test_configs=$(printf '%s\n' "${fixture_dirs[@]##*/}" |jq -scR 'split("\n")|.[:-1]')
 
           printf 'test-configs=%s\n' "${test_configs}" | tee -a $GITHUB_OUTPUT
