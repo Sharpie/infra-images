@@ -26,7 +26,6 @@ on:
 
 env:
   IMAGE: '${{ inputs.image }}'
-  TAG: '${{ github.sha }}'
 
 jobs:
   setup:
@@ -47,7 +46,7 @@ jobs:
           test_configs=$(printf '%s\n' "${fixture_dirs[@]##*/}" |jq -scR 'split("\n")|.[:-1]')
 
           printf 'test-configs=%s\n' "${test_configs}" | tee -a $GITHUB_OUTPUT
-          printf 'tag=%s\n' "${TAG}" | tee -a $GITHUB_OUTPUT
+          printf 'tag=%s\n' "$(date +'%Y%m%d')-$(git log --format=%h --max-count=1 |tr -d '\n')" | tee -a $GITHUB_OUTPUT
 
   build:
     needs:
@@ -104,6 +103,7 @@ jobs:
     env:
       PLATFORM: '${{ matrix.platform }}'
       DOCKER_TAR: '${{ inputs.image }}_${{ needs.setup.outputs.tag }}_${{ matrix.platform }}.tar'
+      DOCKER_TAG: '${{ inputs.image }}:${{ needs.setup.outputs.tag }}-${{ matrix.platform }}'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -128,7 +128,7 @@ jobs:
         run: |
           cd "${IMAGE}/spec/fixtures/docker"
 
-          env DOCKER_TAG="${IMAGE}:${TAG}-${PLATFORM}" DOCKER_PLATFORM="linux/${PLATFORM}" docker compose up -d
+          env DOCKER_PLATFORM="linux/${PLATFORM}" docker compose up -d
       - name: Run Acceptance Tests
         run: |
           bundle exec rspec --force-color --format documentation -I spec/ "${IMAGE}"/spec/acceptance/docker/*.rb
@@ -141,6 +141,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     env:
+      TAG: '${{ needs.setup.outputs.tag }}'
       DOCKER_TAR: '${{ inputs.image }}_${{ needs.setup.outputs.tag }}_amd64.tar'
     steps:
       - uses: actions/checkout@v4
@@ -223,6 +224,7 @@ jobs:
     #       may be skipped due to no implementation.
     if: "${{ !cancelled() && !failure() }}"
     env:
+      TAG: '${{ needs.setup.outputs.tag }}'
       BUILD_OUTPUT: '${{ toJSON(needs.build.outputs) }}'
     services:
       registry:
