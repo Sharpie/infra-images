@@ -31,6 +31,7 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-24.04
+    timeout-minutes: 1
     outputs:
       test-configs: '${{ steps.set-params.outputs.test-configs }}'
       tag: '${{ steps.set-params.outputs.tag }}'
@@ -52,6 +53,7 @@ jobs:
     needs:
       - setup
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     strategy:
       matrix:
         platform: '${{ fromJSON(inputs.platforms) }}'
@@ -95,6 +97,7 @@ jobs:
       - build
     if: "${{ contains(fromJSON(needs.setup.outputs.test-configs), 'docker') }}"
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     strategy:
       matrix:
         platform: '${{ fromJSON(inputs.platforms) }}'
@@ -136,6 +139,7 @@ jobs:
       - build
     if: "${{ contains(fromJSON(needs.setup.outputs.test-configs), 'kubernetes') }}"
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     env:
       DOCKER_TAR: '${{ inputs.image }}_${{ needs.setup.outputs.tag }}_amd64.tar'
     steps:
@@ -209,6 +213,7 @@ jobs:
   #       it to copy the merged multi-arch tag to the ghcr.io registry.
   ship:
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     needs: 
       - setup
       - build
