@@ -9,6 +9,7 @@ on:
         required: true
         type: choice
         options:
+          - dante
           - nfs
       platforms:
         description: 'JSON list of platforms to build'
