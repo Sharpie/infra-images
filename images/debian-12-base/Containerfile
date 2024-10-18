@@ -7,7 +7,7 @@ RUN set -xe \
     && apt full-upgrade -y \
     && apt autoremove \
     && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends bind9-dnsutils ca-certificates curl \
-       iproute2 iputils-ping netcat-traditional procps vim-tiny \
+       file iproute2 iputils-ping netcat-traditional procps vim-tiny \
     && update-alternatives --set editor /usr/bin/vim.tiny
 
 ENTRYPOINT ["/bin/bash"]
