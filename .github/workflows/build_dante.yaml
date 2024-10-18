@@ -5,7 +5,7 @@ on:
   workflow_dispatch: {}
   push:
     paths:
-      - 'dante/**'
+      - 'images/dante/**'
   # Build at noon, on the 1st and 15th of each month.
   schedule:
     - cron: '0 12 1 * *'

@@ -1,0 +1,8 @@
+resources:
+  - kubernetes/01-csi-driver-nfs.yaml
+  - kubernetes/02-nfs-server.yaml
+  - kubernetes/03-nfs-client.yaml
+images:
+  - name: ghcr.io/sharpie/nfs
+    newName: nfs
+    newTag: blah

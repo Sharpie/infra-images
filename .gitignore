@@ -1,4 +1,4 @@
 .bundle
 Gemfile.lock
 Gemfile.local
-*/spec/fixtures/kustomization.yaml
+images/*/spec/fixtures/kustomization.yaml

@@ -1,0 +1,11 @@
+FROM debian-12-systemd
+
+RUN set -xe \
+    && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends nfs-kernel-server \
+    && systemctl mask rpcbind.service rpcbind.socket rpc-statd.service \
+    && systemctl enable nfs-kernel-server.service
+
+COPY rootfs/ /
+
+VOLUME /data
+EXPOSE 2049/tcp
