@@ -19,6 +19,14 @@ target "dante" {
   dockerfile = "Containerfile"
 }
 
+target "headscale" {
+  context = "images/headscale"
+  contexts = {
+    debian-12-base = "target:debian-12-base"
+  }
+  dockerfile = "Containerfile"
+}
+
 target "nfs" {
   context = "images/nfs"
   contexts = {
