@@ -6,6 +6,9 @@ on:
   push:
     paths:
       - 'images/nfs/**'
+      - 'images/debian-12-base/**'
+      - 'images/debian-12-systemd/**'
+      - '.github/workflows/build_container.yaml'
   # Build at noon, on the 1st and 15th of each month.
   schedule:
     - cron: '0 12 1 * *'

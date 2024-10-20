@@ -6,6 +6,8 @@ on:
   push:
     paths:
       - 'images/headscale/**'
+      - 'images/debian-12-base/**'
+      - '.github/workflows/build_container.yaml'
   # Build at noon, on the 1st and 15th of each month.
   schedule:
     - cron: '0 12 1 * *'
