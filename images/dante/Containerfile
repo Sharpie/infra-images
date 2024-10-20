@@ -5,4 +5,4 @@ RUN set -xe \
 
 EXPOSE 1080/tcp
 
-ENTRYPOINT ["/usr/sbin/danted"]
+CMD ["/usr/sbin/danted"]

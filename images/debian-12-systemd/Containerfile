@@ -8,4 +8,4 @@ COPY rootfs/ /
 
 STOPSIGNAL SIGRTMIN+3
 
-ENTRYPOINT ["/usr/lib/systemd/systemd"]
+CMD ["/usr/lib/systemd/systemd"]

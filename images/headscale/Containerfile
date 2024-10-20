@@ -9,4 +9,4 @@ RUN curl -L https://github.com/juanfont/headscale/releases/download/v${VERSION}/
 
 VOLUME /data
 
-ENTRYPOINT ["/usr/local/bin/headscale", "serve"]
+CMD ["/usr/local/bin/headscale", "serve"]
