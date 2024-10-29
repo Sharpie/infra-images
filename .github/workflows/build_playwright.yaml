@@ -1,0 +1,20 @@
+---
+name: Build Playwright Server
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'images/playwright/**'
+      - '.github/workflows/build_container.yaml'
+  # Build at noon, on the 1st and 15th of each month.
+  schedule:
+    - cron: '0 12 1 * *'
+    - cron: '0 12 15 * *'
+
+jobs:
+  build_playwright:
+    uses: ./.github/workflows/build_container.yaml
+    with:
+      image: playwright
+      platforms: '["amd64", "arm64"]'

@@ -34,3 +34,8 @@ target "nfs" {
   }
   dockerfile = "Containerfile"
 }
+
+target "playwright" {
+  context = "images/playwright"
+  dockerfile = "Containerfile"
+}

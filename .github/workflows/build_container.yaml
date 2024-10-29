@@ -12,6 +12,7 @@ on:
           - dante
           - headscale
           - nfs
+          - playwright
       platforms:
         description: 'JSON list of platforms to build'
         required: true

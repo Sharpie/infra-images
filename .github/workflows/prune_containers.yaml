@@ -22,6 +22,6 @@ jobs:
         with:
           account: user
           token: '${{ secrets.GITHUB_TOKEN }}'
-          image-names: 'dante headscale nfs'
+          image-names: 'dante headscale nfs playwright'
           image-tags: '!latest'
           cut-off: '90d'
