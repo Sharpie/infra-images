@@ -1,7 +1,7 @@
 FROM debian-12-base
 
 ARG TARGETARCH
-ARG VERSION=0.22.3
+ARG VERSION=0.23.0
 
 RUN curl -L https://github.com/juanfont/headscale/releases/download/v${VERSION}/headscale_${VERSION}_linux_${TARGETARCH} -o /usr/local/bin/headscale; \
     chmod +x /usr/local/bin/headscale; \
