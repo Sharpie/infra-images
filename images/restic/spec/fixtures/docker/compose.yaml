@@ -1,0 +1,11 @@
+---
+services:
+  restic:
+    container_name: restic-test
+    image: '${DOCKER_TAG:-ghcr.io/sharpie/restic:latest}'
+    platform: '${DOCKER_PLATFORM:-}'
+    environment:
+      container: docker
+    command:
+      - /bin/sleep
+      - infinity

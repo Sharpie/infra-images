@@ -1,0 +1,17 @@
+FROM alpine-3-base
+
+ARG TARGETARCH
+ARG VERSION=0.17.3
+ARG REST_VERSION=0.13.0
+
+RUN set -xe; \
+    apk add openssh; \
+    curl -L https://github.com/restic/restic/releases/download/v${VERSION}/restic_${VERSION}_linux_${TARGETARCH}.bz2 | bzip2 -d -c >/usr/local/bin/restic; \
+    curl -L https://github.com/restic/rest-server/releases/download/v${REST_VERSION}/rest-server_${REST_VERSION}_linux_${TARGETARCH}.tar.gz | tar -C /usr/local/bin -xz --wildcards --strip-components=1 '*/rest-server'; \
+    chmod 0755 /usr/local/bin/rest*
+
+COPY rootfs/ /
+
+VOLUME ["/etc/restic", "/var/lib/restic"]
+
+ENV RESTIC_CACHE_DIR=/var/lib/restic/cache

@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# Wrapper script that runs "restic copy" to sync snapshots
+# between two repositories.
+#
+# Args are: from-repo to-repo
+#
+# This wrapper cannot copy between repos of the same type
+# unless their credentials happen to be identical.
+#
+# For example, copying between S3 and MinIO will not work.
+#
+# Configuration data for these repositories is read from
+# /etc/restic/{from,to}
+
+from_repo="${1?The first argument to this script must be the name of a source repository.}"
+to_repo="${2?The second argument to this script must be the name of a target repository.}"
+
+config_dir=/etc/restic
+
+load_repo() {
+  if [ ! -d $config_dir/$1 ]; then
+    printf 'No configuration located at: %s\n' "${config_dir}/${1}" >&2
+    exit 1
+  fi
+
+  case "$2" in
+    from)
+      export RESTIC_FROM_REPOSITORY="$(cat "${config_dir}/${1}/restic-repository"|tr -d '\n')"
+      export RESTIC_FROM_PASSWORD="$(cat "${config_dir}/${1}/restic-password"|tr -d '\n')"
+      restic_repo=$RESTIC_FROM_REPOSITORY
+      ;;
+    *)
+      export RESTIC_REPOSITORY="$(cat "${config_dir}/${1}/restic-repository"|tr -d '\n')"
+      export RESTIC_PASSWORD="$(cat "${config_dir}/${1}/restic-password"|tr -d '\n')"
+      restic_repo=$RESTIC_REPOSITORY
+      ;;
+  esac
+
+  case "${restic_repo}" in
+    s3:*)
+      export AWS_ACCESS_KEY_ID="$(cat "${config_dir}/${1}/username")"
+      export AWS_SECRET_ACCESS_KEY="$(cat "${config_dir}/${1}/password")"
+      ;;
+    rest:*)
+      export RESTIC_REST_USERNAME="$(cat "${config_dir}/${1}/username")"
+      export RESTIC_REST_PASSWORD="$(cat "${config_dir}/${1}/password")"
+      ;;
+    sftp:*)
+      eval $(ssh-agent)
+      cp "${config_dir}/${1}/private-key" /tmp/restic-key
+      chmod 0600 /tmp/restic-key
+      ssh-add /tmp/restic-key
+      rm /tmp/restic-key
+      ;;
+  esac
+}
+
+printf 'Loading FROM_REPOSITORY: %s\n' "${1}" >&2
+load_repo "$1" 'from'
+
+printf 'Loading TO_REPOSITORY: %s\n' "${2}" >&2
+load_repo "$2"
+
+printf 'Copying: %s\nTo: %s\n' "${RESTIC_FROM_REPOSITORY}" "${RESTIC_REPOSITORY}" >&2
+restic copy

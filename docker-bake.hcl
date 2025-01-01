@@ -44,3 +44,11 @@ target "playwright" {
   context = "images/playwright"
   dockerfile = "Containerfile"
 }
+
+target "restic" {
+  context = "images/restic"
+  contexts = {
+    alpine-3-base = "target:alpine-3-base"
+  }
+  dockerfile = "Containerfile"
+}
