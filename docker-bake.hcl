@@ -1,3 +1,8 @@
+target "alpine-3-base" {
+  context = "images/alpine-3-base"
+  dockerfile = "Containerfile"
+}
+
 target "debian-12-base" {
   context = "images/debian-12-base"
   dockerfile = "Containerfile"
