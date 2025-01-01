@@ -1,0 +1,10 @@
+FROM alpine-3-base
+
+RUN set -xe; \
+    apk add gocryptfs;
+
+COPY rootfs/ /
+
+VOLUME ["/etc/gocryptfs", "/mnt/crypt", "/mnt/share"]
+
+CMD ["/usr/local/bin/run-gocryptfs", "/mnt/crypt", "/mnt/share"]

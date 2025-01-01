@@ -1,0 +1,21 @@
+---
+name: Build Gocryptfs Container
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'images/gocryptfs/**'
+      - 'images/alpine-3-base/**'
+      - '.github/workflows/build_container.yaml'
+  # Build at noon, on the 1st and 15th of each month.
+  schedule:
+    - cron: '0 12 1 * *'
+    - cron: '0 12 15 * *'
+
+jobs:
+  build_gocryptfs:
+    uses: ./.github/workflows/build_container.yaml
+    with:
+      image: gocryptfs
+      platforms: '["amd64", "arm64"]'

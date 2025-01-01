@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Wrapper script that initializes and runs gocryptfs.
+#
+# Assumptions:
+#   - password is mounted at: /etc/gocryptfs/password
+
+set -euo pipefail
+
+crypt_dir="${1?The first argument to this script must be the path of the encrypted directory.}"
+share_dir="${2?The second argument to this script must be the path of the decrypted directory.}"
+
+passwd_file='/etc/gocryptfs/password'
+
+if [ ! -f $passwd_file ]; then
+  printf 'A password must be provided at: %s\n' "${passwd_file}" >&2
+  exit 1
+fi
+
+if [ ! -f "${crypt_dir}/gocryptfs.conf" ]; then
+  gocryptfs -init -quiet -passfile "${passwd_file}" "${crypt_dir}"
+fi
+
+gocryptfs -fg -nosyslog -allow_other -passfile "${passwd_file}" "${crypt_dir}" "${share_dir}"

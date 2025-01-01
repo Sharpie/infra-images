@@ -1,0 +1,18 @@
+---
+services:
+  restic:
+    container_name: gocryptfs-test
+    image: '${DOCKER_TAG:-ghcr.io/sharpie/gocryptfs:latest}'
+    platform: '${DOCKER_PLATFORM:-}'
+    environment:
+      container: docker
+    devices:
+      - /dev/fuse
+    privileged: true
+    configs:
+      - source: gocryptfs-password
+        target: /etc/gocryptfs/password
+
+configs:
+  gocryptfs-password:
+    content: "hunter2"

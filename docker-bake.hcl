@@ -24,6 +24,14 @@ target "dante" {
   dockerfile = "Containerfile"
 }
 
+target "gocryptfs" {
+  context = "images/gocryptfs"
+  contexts = {
+    alpine-3-base = "target:alpine-3-base"
+  }
+  dockerfile = "Containerfile"
+}
+
 target "headscale" {
   context = "images/headscale"
   contexts = {
