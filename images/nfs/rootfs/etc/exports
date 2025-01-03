@@ -1,1 +1,1 @@
-/data *(rw,wdelay,fsid=0,root_squash,no_subtree_check,insecure)
+/data *(rw,wdelay,fsid=0,no_root_squash,no_subtree_check,insecure)
