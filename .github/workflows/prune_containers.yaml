@@ -22,6 +22,6 @@ jobs:
         with:
           account: user
           token: '${{ secrets.GITHUB_TOKEN }}'
-          image-names: 'dante gocryptfs headscale nfs playwright restic'
+          image-names: 'dante gocryptfs headscale nfs novnc playwright restic'
           image-tags: '!latest'
           cut-off: '90d'

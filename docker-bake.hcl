@@ -48,6 +48,14 @@ target "nfs" {
   dockerfile = "Containerfile"
 }
 
+target "novnc" {
+  context = "images/novnc"
+  contexts = {
+    debian-12-base = "target:debian-12-base"
+  }
+  dockerfile = "Containerfile"
+}
+
 target "playwright" {
   context = "images/playwright"
   dockerfile = "Containerfile"

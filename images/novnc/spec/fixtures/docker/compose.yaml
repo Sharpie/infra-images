@@ -1,0 +1,8 @@
+---
+services:
+  novnc:
+    container_name: novnc-test
+    image: '${DOCKER_TAG:-ghcr.io/sharpie/novnc:latest}'
+    platform: '${DOCKER_PLATFORM:-}'
+    environment:
+      container: docker
