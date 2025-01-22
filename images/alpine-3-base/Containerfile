@@ -3,7 +3,7 @@ FROM alpine:3
 RUN set -xe \
     && apk update \
     && apk upgrade \
-    && apk add bash bind-tools curl file iproute2 mtr netcat-openbsd neovim openssl procps tar \
+    && apk add bash bind-tools curl file iproute2 mtr netcat-openbsd neovim openssl procps tar tini \
     && ln -s /usr/bin/nvim /usr/local/bin/vim
 
 CMD ["/bin/bash"]
