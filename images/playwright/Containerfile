@@ -1,8 +1,8 @@
 FROM mcr.microsoft.com/playwright:v1.54.1-noble
 
 RUN set -xe \
-    && /usr/bin/npx -y playwright@1.54.1 install firefox --with-deps
+    && /usr/bin/npx -y playwright@1.53.2 install firefox --with-deps
 
 EXPOSE 8080/tcp
 
-CMD ["/usr/bin/npx", "playwright@1.54.1", "run-server", "--port", "8080", "--path", "/ws"]
+CMD ["/usr/bin/npx", "playwright@1.53.2", "run-server", "--port", "8080", "--path", "/ws"]
