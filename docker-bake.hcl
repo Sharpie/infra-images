@@ -48,7 +48,7 @@ target "gocryptfs" {
 target "headscale" {
   context = "images/headscale"
   contexts = {
-    debian-12-base = "target:debian-12-base"
+    debian-13-base = "target:debian-13-base"
   }
   dockerfile = "Containerfile"
 }
