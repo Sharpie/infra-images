@@ -16,6 +16,19 @@ target "debian-12-systemd" {
   dockerfile = "Containerfile"
 }
 
+target "debian-13-base" {
+  context = "images/debian-13-base"
+  dockerfile = "Containerfile"
+}
+
+target "debian-13-systemd" {
+  context = "images/debian-13-systemd"
+  contexts = {
+    debian-13-base = "target:debian-13-base"
+  }
+  dockerfile = "Containerfile"
+}
+
 target "dante" {
   context = "images/dante"
   contexts = {

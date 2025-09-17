@@ -1,0 +1,13 @@
+FROM debian:13-slim
+
+COPY rootfs/ /
+
+RUN set -xe \
+    && apt update \
+    && apt full-upgrade -y \
+    && apt autoremove \
+    && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends bind9-dnsutils ca-certificates curl \
+       file iproute2 iputils-ping netcat-traditional procps vim-tiny \
+    && update-alternatives --set editor /usr/bin/vim.tiny
+
+CMD ["/bin/bash"]

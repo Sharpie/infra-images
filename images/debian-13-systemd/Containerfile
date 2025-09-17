@@ -1,0 +1,11 @@
+FROM debian-13-base
+
+RUN set -xe \
+    && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends systemd \
+    && systemctl disable getty@.service
+
+COPY rootfs/ /
+
+STOPSIGNAL SIGRTMIN+3
+
+CMD ["/usr/lib/systemd/systemd"]
