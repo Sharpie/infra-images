@@ -14,4 +14,6 @@ RUN set -xe \
 
 EXPOSE 8080/tcp
 
+HEALTHCHECK --start-period=30s CMD /usr/bin/curl -f http://127.0.0.1:8080/ws
+
 CMD ["/usr/bin/npx", "playwright@1.53.2", "run-server", "--port", "8080", "--path", "/ws"]
