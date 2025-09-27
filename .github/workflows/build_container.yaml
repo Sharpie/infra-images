@@ -115,6 +115,7 @@ jobs:
       PLATFORM: '${{ matrix.platform }}'
       DOCKER_TAR: '${{ inputs.image }}_${{ needs.setup.outputs.tag }}_${{ matrix.platform }}.tar'
       DOCKER_TAG: '${{ inputs.image }}:${{ needs.setup.outputs.tag }}-${{ matrix.platform }}'
+      BUNDLE_WITH: '${{ inputs.image }}'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -154,6 +155,7 @@ jobs:
     env:
       TAG: '${{ needs.setup.outputs.tag }}'
       DOCKER_TAR: '${{ inputs.image }}_${{ needs.setup.outputs.tag }}_amd64.tar'
+      BUNDLE_WITH: '${{ inputs.image }}'
     steps:
       - uses: actions/checkout@v4
         with:
