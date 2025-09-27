@@ -140,7 +140,7 @@ jobs:
         run: |
           cd "images/${IMAGE}/spec/fixtures/docker"
 
-          env DOCKER_PLATFORM="linux/${PLATFORM}" docker compose up -d
+          env DOCKER_PLATFORM="linux/${PLATFORM}" docker compose up -d --wait
       - name: Run Acceptance Tests
         run: |
           bundle exec rspec --force-color --format documentation -I spec/ "images/${IMAGE}"/spec/acceptance/docker/*.rb
