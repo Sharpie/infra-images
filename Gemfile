@@ -8,7 +8,7 @@ gem 'specinfra-backend-kubernetes',
   git: 'https://github.com/Sharpie/specinfra-backend-kubernetes'
 
 group :playwright, optional: true do
-  gem 'playwright-ruby-client', '1.54.0'
+  gem 'playwright-ruby-client', '1.55.0'
   gem 'websocket-driver', '0.8.0'
 end
 

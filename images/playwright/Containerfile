@@ -1,4 +1,5 @@
-FROM mcr.microsoft.com/playwright:v1.54.1-noble
+ARG VERSION=1.55.1
+FROM mcr.microsoft.com/playwright:v${VERSION}-noble
 
 RUN set -xe \
     && apt update \
@@ -10,10 +11,11 @@ RUN set -xe \
     && update-alternatives --install /usr/bin/vim vim /usr/bin/vim.tiny 1
 
 RUN set -xe \
-    && /usr/bin/npx -y playwright@1.53.2 install firefox --with-deps
+    && /usr/bin/npx -y playwright@${VERSION} install firefox --with-deps
 
 EXPOSE 8080/tcp
 
 HEALTHCHECK --start-period=30s CMD /usr/bin/curl -f http://127.0.0.1:8080/ws
 
-CMD ["/usr/bin/npx", "playwright@1.53.2", "run-server", "--port", "8080", "--path", "/ws"]
+# FIXME: VERSION should get used here but... everything is dumb.
+CMD ["/usr/bin/npx", "playwright@1.55.1", "run-server", "--port", "8080", "--path", "/ws"]

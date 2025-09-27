@@ -15,8 +15,8 @@ context 'Playwright Server' do
   it 'can open browsers' do
     ip_addr = command('hostname -i').stdout.chomp
 
-    pw = Playwright.connect_to_playwright_server("ws://#{ip_addr}:8080/ws?browser=firefox")
-    ff = pw.playwright.firefox.launch(headless: true)
+    pw = Playwright.connect_to_browser_server("ws://#{ip_addr}:8080/ws", browser_type: 'firefox')
+    ff = pw.browser
 
     page = ff.new_page
 
