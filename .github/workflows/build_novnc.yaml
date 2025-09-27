@@ -6,7 +6,7 @@ on:
   push:
     paths:
       - 'images/novnc/**'
-      - 'images/debian-12-base/**'
+      - 'images/debian-13-base/**'
       - '.github/workflows/build_container.yaml'
   # Build at noon, on the 1st and 15th of each month.
   schedule:

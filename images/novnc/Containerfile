@@ -1,4 +1,4 @@
-FROM debian-12-base
+FROM debian-13-base
 
 # Adapted from: https://github.com/theasp/docker-novnc
 
@@ -26,6 +26,7 @@ ENV HOME=/root \
     RUN_FLUXBOX=yes
 COPY ./app /app
 
-CMD ["/app/entrypoint.sh"]
+EXPOSE 8000/tcp
+HEALTHCHECK --start-period=30s CMD /usr/bin/curl -If http://127.0.0.1:8000/vnc.html
 
-EXPOSE 8000
+CMD ["/app/entrypoint.sh"]

@@ -64,7 +64,7 @@ target "nfs" {
 target "novnc" {
   context = "images/novnc"
   contexts = {
-    debian-12-base = "target:debian-12-base"
+    debian-13-base = "target:debian-13-base"
   }
   dockerfile = "Containerfile"
 }
