@@ -1,0 +1,16 @@
+---
+services:
+  playwright:
+    container_name: playwright
+    image: '${DOCKER_TAG:-ghcr.io/sharpie/playwright:latest}'
+    platform: '${DOCKER_PLATFORM:-}'
+    environment:
+      container: docker
+    networks:
+      - test
+    tmpfs:
+      - /run
+      - /tmp
+
+networks:
+  test:
