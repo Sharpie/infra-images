@@ -63,7 +63,7 @@ jobs:
     needs:
       - setup
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 10
     strategy:
       matrix:
         platform: '${{ fromJSON(inputs.platforms) }}'
