@@ -10,6 +10,7 @@ on:
         type: choice
         options:
           - dante
+          - forgejo-runner
           - gocryptfs
           - headscale
           - nfs

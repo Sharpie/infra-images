@@ -37,6 +37,14 @@ target "dante" {
   dockerfile = "Containerfile"
 }
 
+target "forgejo-runner" {
+  context = "images/forgejo-runner"
+  contexts = {
+    debian-13-base = "target:debian-13-base"
+  }
+  dockerfile = "Containerfile"
+}
+
 target "gocryptfs" {
   context = "images/gocryptfs"
   contexts = {

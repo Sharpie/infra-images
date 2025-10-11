@@ -1,0 +1,21 @@
+FROM debian-13-base
+
+# Packages required to compile Ruby 3.3
+RUN set -xe \
+    && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+       build-essential libssl-dev libffi-dev libyaml-dev
+
+RUN curl https://mise.run/bash | sh
+
+# Required by most Actions
+RUN /root/.local/bin/mise use -g node@24 yarn@1.22
+
+RUN /root/.local/bin/mise use -g docker-cli@latest
+
+# Match Debian 13 defaults
+RUN /root/.local/bin/mise use -g ruby@3.3.8
+
+COPY entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["entrypoint.sh"]
+
+CMD [ "node" ]
