@@ -1,0 +1,39 @@
+Infra Images
+============
+
+Containerized builds of various infrastructure tools. Re-built by
+cron jobs at least every 15 days and occasionally more frequently
+by Git pushes. Published to GitHub Package Registry.
+
+Older builds are deleted after 90 days because this project is
+about keeping up with OS patches and not about maintaining 
+historical artifacts.
+
+All images are built for the AMD64 architecture. Most are also built
+for the ARM64 architecture.
+
+
+Images
+------
+
+### Headscale
+[![Headscale Build Status](https://github.com/Sharpie/infra-images/actions/workflows/build_headscale.yaml/badge.svg?branch=main)](https://github.com/Sharpie/infra-images/actions/workflows/build_headscale.yaml) ![Headscale Version](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FSharpie%2Finfra-images%2Frefs%2Fheads%2Fmain%2Fimages%2Fheadscale%2FContainerfile&search=ARG%20VERSION%3D(%3F%3Cversion%3E.*)&replace=%24%3Cversion%3E&label=Headscale%20Version)
+
+> [!NOTE]
+> Version currently pinned to 0.26.1 while issues around the database
+> refactor in 0.27.0 are worked out.
+
+[Self-hostable Tailscale control server][headscale]. This build
+exists for two reasons:
+
+  - Headscale manages network config. A Debian userland with
+    pre-installed networking tools is very useful for debugging.
+
+  - Headscale has a slow release cadence. This build ensures OS
+    patches are taken up frequently.
+
+[headscale]: https://headscale.net
+
+```sh
+docker pull ghcr.io/sharpie/headscale:latest
+```
