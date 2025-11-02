@@ -11,4 +11,8 @@ RUN set -xe \
     && update-alternatives --set editor /usr/bin/vim.tiny \
     && ln -s /usr/bin/vim.tiny /usr/local/bin/vim
 
+RUN curl -sSL \
+      https://raw.githubusercontent.com/houseabsolute/ubi/refs/tags/v0.8.4/bootstrap/bootstrap-ubi.sh \
+    | bash
+
 CMD ["/bin/bash"]
