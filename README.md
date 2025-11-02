@@ -16,6 +16,19 @@ for the ARM64 architecture.
 Images
 ------
 
+### GocryptFS
+[![GocryptFS Build Status](https://github.com/Sharpie/infra-images/actions/workflows/build_gocryptfs.yaml/badge.svg?branch=main)](https://github.com/Sharpie/infra-images/actions/workflows/build_gocryptfs.yaml) ![GocryptFS Version](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FSharpie%2Finfra-images%2Frefs%2Fheads%2Fmain%2Fimages%2Fgocryptfs%2FContainerfile&search=ARG%20VERSION%3D(%3F%3Cversion%3E.*)&replace=%24%3Cversion%3E&label=GocryptFS%20Version)
+
+[Encrypted overlay filesystem written in Go][gocryptfs]. This build packages
+the binary in a Debian 13 container and provides filesystem initialization
+logic.
+
+[gocryptfs]: https://github.com/rfjakob/gocryptfs
+
+```sh
+docker pull ghcr.io/sharpie/gocryptfs:latest
+```
+
 ### Headscale
 [![Headscale Build Status](https://github.com/Sharpie/infra-images/actions/workflows/build_headscale.yaml/badge.svg?branch=main)](https://github.com/Sharpie/infra-images/actions/workflows/build_headscale.yaml) ![Headscale Version](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FSharpie%2Finfra-images%2Frefs%2Fheads%2Fmain%2Fimages%2Fheadscale%2FContainerfile&search=ARG%20VERSION%3D(%3F%3Cversion%3E.*)&replace=%24%3Cversion%3E&label=Headscale%20Version)
 

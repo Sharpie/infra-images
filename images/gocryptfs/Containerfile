@@ -1,11 +1,8 @@
 FROM debian-13-base
 
-ARG TARGETARCH
-ARG VERSION=2.6.1
+ARG VERSION=v2.6.1
 
-RUN curl -sSL https://github.com/rfjakob/gocryptfs/releases/download/v${VERSION}/gocryptfs_v${VERSION}_linux-static_${TARGETARCH}.tar.gz \
-    | tar -C /usr/local/bin -xzf - gocryptfs ; \
-    chmod +x /usr/local/bin/gocryptfs
+RUN ubi --project rfjakob/gocryptfs --tag $VERSION --in /usr/local/bin
 
 COPY rootfs/ /
 
