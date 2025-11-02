@@ -4,6 +4,8 @@ services:
     container_name: headscale-server
     image: '${DOCKER_TAG:-ghcr.io/sharpie/headscale:latest}'
     platform: '${DOCKER_PLATFORM:-}'
+    command:
+      - serve
     configs:
       - source: headscale_config
         target: /etc/headscale/config.yaml
