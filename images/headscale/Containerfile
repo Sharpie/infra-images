@@ -2,7 +2,7 @@ FROM debian-13-base
 
 ARG VERSION=v0.26.1
 
-RUN ubi --project juanfont/headscale --tag $VERSION --in /usr/local/bin; \
+RUN ubi --project juanfont/headscale --tag $VERSION --in /usr/local/bin && \
     mkdir -p /etc/headscale /var/lib/headscale /var/run/headscale
 
 VOLUME /var/lib/headscale
