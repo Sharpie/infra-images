@@ -50,3 +50,16 @@ exists for two reasons:
 ```sh
 docker pull ghcr.io/sharpie/headscale:latest
 ```
+
+### noVNC
+[![noVNC Build Status](https://github.com/Sharpie/infra-images/actions/workflows/build_novnc.yaml/badge.svg?branch=main)](https://github.com/Sharpie/infra-images/actions/workflows/build_novnc.yaml)
+
+A container that runs a noVNC server. This is useful as a sidecar to
+bridge containerized x11 apps to a viewport that can be visited with
+a browser.
+
+Adapted from: https://github.com/theasp/docker-novnc
+
+```sh
+docker pull ghcr.io/sharpie/novnc:latest
+```
