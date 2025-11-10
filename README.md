@@ -63,3 +63,19 @@ Adapted from: https://github.com/theasp/docker-novnc
 ```sh
 docker pull ghcr.io/sharpie/novnc:latest
 ```
+
+### Playwright
+[![Playwright Build Status](https://github.com/Sharpie/infra-images/actions/workflows/build_playwright.yaml/badge.svg?branch=main)](https://github.com/Sharpie/infra-images/actions/workflows/build_playwright.yaml) ![Playwright Version](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FSharpie%2Finfra-images%2Frefs%2Fheads%2Fmain%2Fimages%2Fplaywright%2FContainerfile&search=ARG%20VERSION%3D(%3F%3Cversion%3E.*)&replace=%24%3Cversion%3E&label=Playwright%20Version)
+
+Playwright server useful for scraping and scripted interactions with
+websites. Based on the `mcr.microsoft.com/playwright` with the following
+modifications:
+
+  - Firefox browser is installed by default.
+  - Container default command is set to run the playwright server
+    at: `http://localhost:8080/ws`
+
+Tested for compatibility with [`playwright-ruby-client`][ruby-playwright].
+Pairs well with the [noVNC](#noVNC) container.
+
+[ruby-playwright]: https://github.com/YusukeIwaki/playwright-ruby-client

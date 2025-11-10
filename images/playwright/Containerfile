@@ -1,4 +1,4 @@
-ARG VERSION=1.56.0
+ARG VERSION=1.56.1
 FROM mcr.microsoft.com/playwright:v${VERSION}-noble
 
 RUN set -xe \
@@ -13,9 +13,10 @@ RUN set -xe \
 RUN set -xe \
     && /usr/bin/npx -y playwright@${VERSION} install firefox --with-deps
 
+
 EXPOSE 8080/tcp
 
 HEALTHCHECK --start-period=30s CMD /usr/bin/curl -f http://127.0.0.1:8080/ws
 
 # FIXME: VERSION should get used here but... everything is dumb.
-CMD ["/usr/bin/npx", "playwright@1.56.0", "run-server", "--port", "8080", "--path", "/ws"]
+CMD ["/usr/bin/npx", "playwright@1.56.1", "run-server", "--port", "8080", "--path", "/ws"]
