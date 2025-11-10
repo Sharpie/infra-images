@@ -1,0 +1,78 @@
+[tools]
+docker-cli = 'latest'
+docker-compose = 'latest'
+
+jq = 'latest'
+
+
+[env]
+BUNDLE_PATH = ".bundle/lib"
+
+
+[tasks."bundle:install"]
+description = "Install gem dependencies"
+run = "bundle install"
+
+
+[tasks.build]
+description = "Build application container"
+usage = '''
+arg "<container>" help="Container to build" {
+  choices "dante" "forgejo-runner" "gocryptfs" "headscale" "nfs" "novnc" "playwright" "restic"
+}
+'''
+run = '''
+docker buildx bake --file="{{config_root}}/docker-bake.hcl" "${usage_container?}" --load --metadata-file="{{config_root}}/build-output/${usage_container?}.json"
+'''
+
+[tasks."build:playwright"]
+description = "Build playwright container"
+sources = ['{{config_root}}/docker-bake.hcl',
+           '{{config_root}}/images/playwright/**/*']
+outputs = ['{{config_root}}/build-output/playwright.json']
+run = "mise run build playwright"
+
+
+[tasks."test:docker-up"]
+description = "Set up docker acceptance tests"
+usage = '''
+arg "<container>" help="Container to build" {
+  choices "dante" "forgejo-runner" "gocryptfs" "headscale" "nfs" "novnc" "playwright" "restic"
+}
+'''
+run = '''
+export DOCKER_TAG=$(jq -r .${usage_container?}.\"containerimage.digest\" "{{config_root}}/build-output/${usage_container?}.json")
+cd "{{config_root}}/images/${usage_container?}/spec/fixtures/docker" && \
+  docker compose up -d --wait
+'''
+
+[tasks."test:docker-down"]
+description = "Tear down docker tests"
+usage = '''
+arg "<container>" help="Container to build" {
+  choices "dante" "forgejo-runner" "gocryptfs" "headscale" "nfs" "novnc" "playwright" "restic"
+}
+'''
+run = '''
+cd "{{config_root}}/images/${usage_container?}/spec/fixtures/docker" && \
+  docker compose down --volumes
+'''
+
+[tasks."test:docker-run"]
+description = "Run docker acceptance tests"
+usage = '''
+arg "<container>" help="Container to build" {
+  choices "dante" "forgejo-runner" "gocryptfs" "headscale" "nfs" "novnc" "playwright" "restic"
+}
+'''
+run = '''
+bundle exec rspec --force-color --format documentation -I "{{config_root}}/spec/" "{{config_root}}/images/${usage_container?}"/spec/acceptance/docker/*.rb
+'''
+
+
+[tasks."test:playwright"]
+env = { BUNDLE_WITH = 'playwright' }
+run = ['mise run bundle:install',
+       'mise run build:playwright',
+       'mise run test:docker-up playwright',
+       'mise test:docker-run playwright']
