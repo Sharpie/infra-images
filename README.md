@@ -79,3 +79,7 @@ Tested for compatibility with [`playwright-ruby-client`][ruby-playwright].
 Pairs well with the [noVNC](#noVNC) container.
 
 [ruby-playwright]: https://github.com/YusukeIwaki/playwright-ruby-client
+
+```sh
+docker pull ghcr.io/sharpie/playwright:latest
+```
