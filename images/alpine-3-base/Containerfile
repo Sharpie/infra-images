@@ -6,4 +6,8 @@ RUN set -xe \
     && apk add bash bind-tools curl file iproute2 mtr netcat-openbsd neovim openssl procps tar tini \
     && ln -s /usr/bin/nvim /usr/local/bin/vim
 
+RUN curl -sSL \
+      https://raw.githubusercontent.com/houseabsolute/ubi/refs/tags/v0.8.4/bootstrap/bootstrap-ubi.sh \
+    | bash
+
 CMD ["/bin/bash"]
