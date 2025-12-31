@@ -83,3 +83,15 @@ Pairs well with the [noVNC](#noVNC) container.
 ```sh
 docker pull ghcr.io/sharpie/playwright:latest
 ```
+
+### Restic
+[![Restic Build Status](https://github.com/Sharpie/infra-images/actions/workflows/build_restic.yaml/badge.svg?branch=main)](https://github.com/Sharpie/infra-images/actions/workflows/build_restic.yaml) ![Restic Version](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FSharpie%2Finfra-images%2Frefs%2Fheads%2Fmain%2Fimages%2Frestic%2FContainerfile&search=ARG%20VERSION%3D(%3F%3Cversion%3E.*)&replace=%24%3Cversion%3E&label=Restic%20Version)
+
+This build packages the [Restic][restic] backup tool and 
+its associated `rest-server` in an Alpine Linux container.
+
+[restic]: https://restic.net
+
+```sh
+docker pull ghcr.io/sharpie/restic:latest
+```
