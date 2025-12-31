@@ -1,6 +1,8 @@
 ARG VERSION=1.57.0
 FROM mcr.microsoft.com/playwright:v${VERSION}-noble
 
+ENV PLAYWRIGHT_VERSION=${VERSION}
+
 RUN set -xe \
     && apt update \
     && apt full-upgrade -y \
@@ -18,5 +20,6 @@ EXPOSE 8080/tcp
 
 HEALTHCHECK --start-period=30s CMD /usr/bin/curl -f http://127.0.0.1:8080/ws
 
-# FIXME: VERSION should get used here but... everything is dumb.
-CMD ["/usr/bin/npx", "playwright@1.57.0", "run-server", "--port", "8080", "--path", "/ws"]
+# Shell invocation used to interpolate PLAYWRIGHT_VERSION. Shell
+# replaced by exec so that shutdown signals go directly to npx.
+CMD ["/bin/sh", "-c", "exec /usr/bin/npx playwright@${PLAYWRIGHT_VERSION} run-server --port 8080 --path /ws"]
