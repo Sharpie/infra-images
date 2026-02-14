@@ -275,7 +275,7 @@ jobs:
           done <<<"${items}"
 
           docker manifest create --insecure "localhost:5000/${IMAGE}:${TAG}" "${TAGS[@]}"
-          docker manifest push "localhost:5000/${IMAGE}:${TAG}"
+          docker manifest push --insecure "localhost:5000/${IMAGE}:${TAG}"
       - name: Shipit
         run: |
           regctl registry set localhost:5000 --tls disabled
