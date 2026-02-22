@@ -6,7 +6,7 @@ on:
   push:
     paths:
       - 'images/gocryptfs/**'
-      - 'images/debian-13-base/**'
+      - 'images/alpine-3-base/**'
       - '.github/workflows/build_container.yaml'
   # Build at noon, on the 1st and 15th of each month.
   schedule:
