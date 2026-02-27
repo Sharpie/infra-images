@@ -48,7 +48,7 @@ target "forgejo-runner" {
 target "gocryptfs" {
   context = "images/gocryptfs"
   contexts = {
-    alpine-3-base = "target:alpine-3-base"
+    debian-13-base = "target:debian-13-base"
   }
   dockerfile = "Containerfile"
 }

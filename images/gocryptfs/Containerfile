@@ -1,7 +1,8 @@
-FROM alpine-3-base
+FROM debian-13-base
 
-RUN set -xe; \
-    apk add gocryptfs;
+ARG VERSION=v2.6.1
+
+RUN ubi --project rfjakob/gocryptfs --tag $VERSION --in /usr/local/bin
 
 COPY rootfs/ /
 
