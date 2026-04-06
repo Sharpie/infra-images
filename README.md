@@ -32,10 +32,6 @@ docker pull ghcr.io/sharpie/gocryptfs:latest
 ### Headscale
 [![Headscale Build Status](https://github.com/Sharpie/infra-images/actions/workflows/build_headscale.yaml/badge.svg?branch=main)](https://github.com/Sharpie/infra-images/actions/workflows/build_headscale.yaml) ![Headscale Version](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FSharpie%2Finfra-images%2Frefs%2Fheads%2Fmain%2Fimages%2Fheadscale%2FContainerfile&search=ARG%20VERSION%3D(%3F%3Cversion%3E.*)&replace=%24%3Cversion%3E&label=Headscale%20Version)
 
-> [!NOTE]
-> Version currently pinned to 0.26.1 while issues around the database
-> refactor in 0.27.0 are worked out.
-
 [Self-hostable Tailscale control server][headscale]. This build
 exists for two reasons:
 

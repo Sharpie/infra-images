@@ -1,6 +1,6 @@
 FROM debian-13-base
 
-ARG VERSION=v0.26.1
+ARG VERSION=v0.28.0
 
 RUN ubi --project juanfont/headscale --tag $VERSION --in /usr/local/bin && \
     mkdir -p /etc/headscale /var/lib/headscale /var/run/headscale
