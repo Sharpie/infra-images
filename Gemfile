@@ -8,8 +8,8 @@ gem 'specinfra-backend-kubernetes',
   git: 'https://github.com/Sharpie/specinfra-backend-kubernetes'
 
 group :playwright, optional: true do
-  gem 'playwright-ruby-client', '1.58.1'
-  gem 'websocket-driver', '0.8.0'
+  gem 'playwright-ruby-client', '1.63.0'
+  gem 'websocket-driver', '0.8.2'
 end
 
 if File.exist? "#{__FILE__}.local"
